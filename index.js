@@ -7,6 +7,10 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 import authRoutes from './routes/auth.js';
+import clientRoutes from './routes/clients.js';
+import campaignRoutes from './routes/campaigns.js';
+import templateRoutes from './routes/templates.js';
+import analyticsRoutes from './routes/analytics.js';
 
 import './tasks/autoCheck.js';
 
@@ -32,6 +36,10 @@ mongoose.connect(process.env.MONGO_URI, {
 
 
 app.use('/auth', authRoutes);
+app.use('/clients', clientRoutes);
+app.use('/campaigns', campaignRoutes);
+app.use('/templates', templateRoutes);
+app.use('/analytics', analyticsRoutes);
 
 app.get('/', (req, res) => {
   res.send('Работает!');

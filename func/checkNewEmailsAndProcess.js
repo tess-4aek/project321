@@ -7,6 +7,7 @@ import { google } from 'googleapis';
 import Manager from '../models/Manager.js';
 import processEmailWithOpenAI from './processEmailWithOpenAI.js';
 import sendToGoogleSheet from './sendToGoogleSheet.js';
+import { isClientEmail } from '../utils/emailUtils.js';
 
 
 export default async function checkNewEmailsAndProcess() {
@@ -28,6 +29,9 @@ export default async function checkNewEmailsAndProcess() {
 
       const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
 
+      // Get client emails for filtering
+      const clientEmails = manager.clients.map(client => client.email.toLowerCase());
+
       const listRes = await gmail.users.messages.list({
         userId: 'me',
         q: 'in:inbox',
@@ -47,6 +51,19 @@ export default async function checkNewEmailsAndProcess() {
           format: 'full'
         });
 
+        // Extract sender email from headers
+        const headers = full.data.payload.headers || [];
+        const fromHeader = headers.find(h => h.name.toLowerCase() === 'from')?.value || '';
+        const senderEmail = extractEmailFromHeader(fromHeader);
+
+        // Only process emails from known clients
+        if (!isClientEmail(senderEmail, clientEmails)) {
+          console.log(`⏭️ Skipping email from non-client: ${senderEmail}`);
+          // Still mark as processed to avoid reprocessing
+          manager.messages.push({ id: msg.id, stage: 'skipped' });
+          continue;
+        }
+
         const rawText = extractTextFromMessage(full);
 
         if (!rawText) continue;
@@ -60,6 +77,12 @@ export default async function checkNewEmailsAndProcess() {
           if (gptData) {
             await sendToGoogleSheet(manager, gptData);
             updateMessageStage(manager, msg.id, 'success');
+            
+            // Update client response count
+            const client = manager.clients.find(c => c.email.toLowerCase() === senderEmail.toLowerCase());
+            if (client) {
+              client.responseCount += 1;
+            }
           } else {
             updateMessageStage(manager, msg.id, 'error');
           }
@@ -74,6 +97,11 @@ export default async function checkNewEmailsAndProcess() {
       console.error(`Ошибка при проверке ${manager.email}:`, err);
     }
   }
+}
+
+function extractEmailFromHeader(fromHeader) {
+  const emailMatch = fromHeader.match(/<([^>]+)>/) || fromHeader.match(/([^\s<>]+@[^\s<>]+)/);
+  return emailMatch ? emailMatch[1].toLowerCase() : '';
 }
 
 function extractTextFromMessage(msg) {
