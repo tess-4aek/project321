@@ -21,7 +21,11 @@ app.use(express.json());
 
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    bufferTimeoutMS: 30000,
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000
 })
     .then(() => {
         console.log('Успешное подключение к MongoDB');
@@ -31,6 +35,7 @@ mongoose.connect(process.env.MONGO_URI, {
     })
     .catch((err) => {
         console.error('Ошибка подключения к MongoDB:', err);
+        process.exit(1);
     });
 
 
