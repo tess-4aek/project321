@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 5000;
 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/mail-auto-manager', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     bufferTimeoutMS: 30000,
@@ -28,13 +28,14 @@ mongoose.connect(process.env.MONGO_URI, {
     connectTimeoutMS: 30000
 })
     .then(() => {
-        console.log('Успешное подключение к MongoDB');
+        console.log('Успешное подключение к MongoDB:', process.env.MONGO_URI ? 'Atlas' : 'Local');
         app.listen(PORT, () => {
             console.log(`Сервер запущен на http://localhost:${PORT}`);
         });
     })
     .catch((err) => {
         console.error('Ошибка подключения к MongoDB:', err);
+        console.error('Проверьте MONGO_URI в .env файле:', process.env.MONGO_URI);
         process.exit(1);
     });
 
