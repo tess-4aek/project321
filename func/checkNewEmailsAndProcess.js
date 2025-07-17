@@ -1,10 +1,13 @@
+import dotenv from 'dotenv';
+
+// Load environment variables first
+dotenv.config();
+
 import { google } from 'googleapis';
 import Manager from '../models/Manager.js';
 import processEmailWithOpenAI from './processEmailWithOpenAI.js';
-import dotenv from 'dotenv';
 import sendToGoogleSheet from './sendToGoogleSheet.js';
 
-dotenv.config();
 
 export default async function checkNewEmailsAndProcess() {
   const managers = await Manager.find();

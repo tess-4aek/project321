@@ -1,9 +1,12 @@
+import dotenv from 'dotenv';
+
+// Load environment variables first
+dotenv.config();
+
 import express from 'express';
 import { google } from 'googleapis';
 import Manager from '../models/Manager.js';
-import dotenv from 'dotenv';
 
-dotenv.config();
 const router = express.Router();
 
 const oAuth2Client = new google.auth.OAuth2(

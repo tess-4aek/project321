@@ -1,12 +1,14 @@
+import dotenv from 'dotenv';
+
+// Load environment variables first, before any other imports
+dotenv.config();
+
 import express from 'express';
 import mongoose from 'mongoose';
-import dotenv from 'dotenv';
 
 import authRoutes from './routes/auth.js';
 
 import './tasks/autoCheck.js';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
