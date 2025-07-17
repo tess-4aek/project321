@@ -22,7 +22,7 @@ app.use(express.json());
 mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/mail-auto-manager', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    bufferTimeoutMS: 30000,
+    bufferTimeoutMS: 60000,
     serverSelectionTimeoutMS: 30000,
     socketTimeoutMS: 45000,
     connectTimeoutMS: 30000
